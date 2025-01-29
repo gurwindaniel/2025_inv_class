@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <%- include('./head.ejs') %>
+    <title>Users</title>
+  </head>
+  <body>
+    <%- include('./nav.ejs') %> <%- include('./tail.ejs') %>
+    <div class="container">
+        <div class="container">
+
+            <form action="/userpost" method="post" style="box-shadow: 0 4px 8px rgba(0,0,0,0.2);border-radius: 10px;" class="m-5 p-2">
+              <h1 class="text-primary m-2">Add Users</h1>
+              <div class="row">
+                <div class="col">
+              <label for="us"></label>
+              <input type="text" id="us"name="user_name" class="form-control" placeholder="Name" />
+            </div>
+            <div class="col">
+              <label for="ps"></label>
+              <input type="text" id="ps" name="passwords" class="form-control" placeholder="password" />
+            </div>
+            <div class="col">
+              <select class="selectpicker p-2 m-4"  id="role_id">
+              <% for(let i=0;i<roles.length;i++){ %>
+                <option value="<%=roles[i].role_id%>"><%=roles[i].role_name%></option>
+                <% } %>
+              </select>
+            </div>
+            </div>
+              <button id="user_btn" class="btn btn-primary m-3">Submit</button>
+            </form>
+            <table id="user_table" class="m-3 table table-striped table-hover table-bordered">
+                <thead>
+              
+                <th>User ID</th><th>User Name</th><th>Role</th>
+               
+              </thead>
+              <% for(let i=0;i<list_users.length;i++){ %>
+                  
+                <tr> 
+                  <td><%=list_users[i].user_id%></td>
+                  <td><%=list_users[i].user_name%></td>
+                  <td><%=list_users[i].role_name%></td>
+                  <td style="display: none;"><%=list_users[i].passwords%></td>
+                </tr>
+                <% } %>
+              </table>
+    </div>
+    <script>
+      $(document).ready(function () {
+        
+        $('#user_btn').on('click',function(e){
+            e.preventDefault()
+            const user_name=$('#us').val()
+            const passwords=$('#ps').val()
+            const role_name=$('#role_id option:selected').text()
+            const role_id=$('#role_id option:selected').val()
+
+            const users={};
+            users.user_name=user_name;
+            users.passwords=passwords;
+            users.role_id=role_id;
+            users.role_name=role_name;
+            console.log(users);
+            if(users.user_name=="" || users.passwords=="" || users.role_id==""){
+                alert('Please Enter the required fields');
+                return false
+            }else{
+                $.ajax({
+                url:"/userpost",
+                method:"POST",
+                data:users,
+
+                success:function(data){
+                    if(data=='duplicate'){
+                        alert('User Name Already exist');
+                        return false
+                    }else{
+                        alert('User Created Successfully');
+                    $('#us').val('');
+                    $('#ps').val('');
+                    }
+                    
+                    // location.reload();
+                }
+            })
+
+            }
+            
+        })
+      });
+    </script>
+  </body>
+</html>
