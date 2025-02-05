@@ -75,6 +75,57 @@ router.post('/userpost', async (request, response) => {
   }
 });
 
+//edit users
+//user edit
+router.post('/useredit', async (request, response) => {
+  console.log(request.body);
+  const client = await pool.connect();
+  const user_name = request.body.user_name;
+  const passwords = request.body.passwords;
+  const role_id = request.body.role_id;
+  const user_id = request.body.user_id;
+  const users_check = {};
+  users_check.user_name = user_name;
+  users_check.passwords = passwords;
+  users_check.role_id = role_id;
+  try {
+    const user_data = await client.query(
+      `select * from users where user_id in ($1)`,
+      [user_id]
+    );
+    const users = user_data.rows[0];
+    console.log(`User from data ${users.user_name}`);
+    console.log(`users to check ${users_check.user_name}`);
+    edit_keys = [];
+    for (let key in users_check) {
+      if (users[key] != users_check[key]) {
+        edit_keys.push(key);
+      }
+    }
+    console.log(edit_keys);
+    if (edit_keys[0] != null) {
+      console.log(edit_keys);
+      for (let i = 0; i < edit_keys.length; i++) {
+        if (edit_keys[i] == 'passwords') {
+          users_check[edit_keys[i]] = await bcyrptjs.hash(passwords, 10);
+        } else if (edit_keys[i] == 'role_id') {
+          users_check[i] = parseInt(users_check[edit_keys[i]]);
+        }
+
+        const query = `update users set ${edit_keys[i]}=$1 where user_id in ($2)`;
+        await client.query(query, [users_check[edit_keys[i]], user_id]);
+      }
+
+      return response.send(request.body).status(200);
+    }
+    return response.send(request.body).status(200);
+  } catch (e) {
+    console.log(`user edit error ${e}`);
+  } finally {
+    client.release();
+  }
+});
+
 router.get('/addressload', async (request, response) => {
   return response.render('address');
 });

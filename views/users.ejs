@@ -129,7 +129,7 @@
       return;
     } else {
       const roles_array = $('#roles_id option')
-        .map(function () {
+        .map(function () { 
           return $(this).text();
         })
         .toArray();
@@ -165,9 +165,9 @@
           location.reload();
         })
 
-        //edit
+        //edit title
         $('#edit').on('click',function(e){
-          $('#users_nameview').prop('disabled',false);
+          // $('#users_nameview').prop('disabled',false);
           $('#passwordview').prop('disabled',false);
           $('#roles_id').prop('disabled',false);
           $('#save_users').show();
@@ -177,6 +177,42 @@
         $('#edit').hover(function(){
           $(this).addClass('pointer');
         })//edit hover ends
+
+        //edit single view
+        $('#save_users').on('click',function(){
+          const user_name = $('#users_nameview').val();
+    const user_id = $('#user_id').val();
+    const passwords = localStorage.getItem('passwords');
+    const local_password = $('#passwordview').val();
+    var to_send;
+    if (passwords.substring(0, 5) == local_password) {
+      to_send = passwords;
+    } else {
+      to_send = local_password;
+    }
+    console.log(to_send);
+    const role_id = $('#roles_id').val();
+    const user = {
+      user_name: user_name,
+      passwords: to_send,
+      role_id: role_id,
+      user_id: user_id,
+    };
+
+    $.ajax({
+      url: '/useredit',
+      type: 'post',
+      data: user,
+      success: function (data) {
+        alert('submitted');
+      },
+    });
+    if (user_name == null || passwords == null) {
+      alert('Please enter all the required fileds');
+    }
+
+
+        })//edit user end
 
       });//document ready function
     </script>
