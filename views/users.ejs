@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <%- include('./head.ejs') %>
     <title>Users</title>
+    <style>
+      .pointer{
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
     <%- include('./nav.ejs') %> <%- include('./tail.ejs') %>
     <div class="container">
+      <%- include('./users_view.ejs') %>
         <div class="container">
 
             <form action="/userpost" method="post" style="box-shadow: 0 4px 8px rgba(0,0,0,0.2);border-radius: 10px;" class="m-5 p-2">
@@ -51,6 +57,7 @@
     </div>
     <script>
       $(document).ready(function () {
+        //saving user page
         
         $('#user_btn').on('click',function(e){
             e.preventDefault()
@@ -90,8 +97,88 @@
 
             }
             
+        })//save users
+
+
+        //single view
+
+        $('#user_table tr:gt(0)').on('click',function(e){
+          $('#save_users').hide()
+          $('#delete_user').hide()
+          const rowData = $(this)
+      .find('td')
+      .map(function () {
+        return $(this).text(); // Get the text content of each cell
+      })
+      .get();
+          console.log(rowData[3]);
+
+          
+    $('#user_id').val(rowData[0]);
+    $('#users_nameview').val(rowData[1]);
+    $('#passwordview').val(rowData[3]);
+    $('#users_nameview').prop('disabled', true);
+    $('#passwordview').prop('disabled', true);
+    const trimmed_value = $('#passwordview').val().trim().substring(0, 5);
+    localStorage.setItem('passwords', $('#passwordview').val());
+    $('#passwordview').val(trimmed_value);
+    $('#roles_id').prop('disabled', true);
+
+    if ($('#roles_id option:selected').text() == rowData[2]) {
+      $('#rowModal').modal('show');
+      return;
+    } else {
+      const roles_array = $('#roles_id option')
+        .map(function () {
+          return $(this).text();
         })
+        .toArray();
+      roles_array.forEach((option) => {
+        if (rowData[2] == option) {
+          console.log(option);
+          $('#roles_id option:selected').text(rowData[2]);
+          $('#roles_id option:selected').val(
+            roles_array.indexOf(rowData[2]) + 1
+          );
+        } else {
+          $('#roles_id option').text(option);
+          $('#roles_id option').val(roles_array.indexOf(option) + 1);
+        }
       });
+
+      //  const last_val= $('#roles_id option:first').text();
+      //   $('#roles_id option:selected').text(rowData[2])
+      //   $('#roles_id option:last').text(last_val);
+      $('#rowModal').modal('show');
+    }
+
+    console.log(rowData);
+  
+  })//single view ends
+
+        //close model
+        $('#close_users').on('click',function(e){
+          $('#rowModal').modal('hide');
+          $('#users_nameview').prop('disabled',true);
+          $('#passwordview').prop('disabled',true);
+          $('#roles_id').prop('disabled',true);
+          location.reload();
+        })
+
+        //edit
+        $('#edit').on('click',function(e){
+          $('#users_nameview').prop('disabled',false);
+          $('#passwordview').prop('disabled',false);
+          $('#roles_id').prop('disabled',false);
+          $('#save_users').show();
+        })//edit page ends
+
+        //edit hover
+        $('#edit').hover(function(){
+          $(this).addClass('pointer');
+        })//edit hover ends
+
+      });//document ready function
     </script>
   </body>
 </html>

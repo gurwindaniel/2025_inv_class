@@ -1,0 +1,53 @@
+<div class="modal" id="rowModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header d-flex justify-content-between w-100">
+        <h5 class="modal-title">Veiw User</h5> 
+        <div class="d-inline-flex align-items-center">
+        <input type="checkbox" class="text_end m-1" id="mycheck" name="check_box">
+        <h5 id="edit" class="text-end text-decoration-underline text-primary">Edit</h5>
+        </div>
+      </div>
+      
+      <div class="modal-body">
+        <form action="/useredit" method="post">
+        <label for="user_id"></label>
+        <input type="text" style="display: none;" class="form-control" id="user_id" />
+        <label for="user_nameview"></label>
+        <input type="text" class="form-control" id="users_nameview" />
+        <label for="passwordview"></label>
+        <input type="password" class="form-control" id="passwordview" />
+        <label for="role"></label>
+        <select class="selectpicker m-2 p-2" id="roles_id">
+          <% for(let i=0;i<roles.length;i++){ %>
+          <option value="<%=roles[i].role_id%>"><%=roles[i].role_name%></option>
+          <% } %>
+        </select>
+      
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="save_users" class="btn btn-primary">
+          Save changes
+        </button>
+        <button
+          type="button"
+          id="close_users"
+          class="btn btn-secondary"
+          data-dismiss="modal"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          id="delete_user"
+          class="btn btn-danger"
+          data-dismiss="modal"
+        >
+          Delete
+        </button>
+
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
