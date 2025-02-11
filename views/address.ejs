@@ -3,12 +3,101 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <%- include('./head.ejs') %>
     <title>Address</title>
+    <link rel="stylesheet" href="../public/css/table.css" />
+    <%- include('./head.ejs') %>
   </head>
   <body>
     <%- include('./nav.ejs') %>
-    <h1>Address</h1>
+
+    <div class="container">
+      <h1 class="text-primary m-2">Address Page</h1>
+      <%- include('./formtemp.ejs') %> <%- include('./addressadd.ejs') %>
+      <table id="user_table" class="m-2 table table-striped table-bordered">
+       <thead>
+          <th>Address Name</th><th>Locations</th><th>Pincode</th><th>Type</th>
+        </thead>
+        <% for (let i=0;i<address_view.length;i++){ %>
+        <tr class="tablerow">
+          <td class="tableColumn"><%=address_view[i].address_name%></td>
+          <td class="tableColumn"><%=address_view[i].locations%></td>
+          <td class="tableColumn"><%=address_view[i].pincode%></td>
+          <td class="tableColumn"><%=address_view[i].person_type%></td>
+          </tr>
+        <% } %>
+       
+      </table>
+    </div>
     <%- include('./tail.ejs') %>
+    <script src="../public/js/page_js/table.js"></script>
+    <script>
+      $(document).ready(function () {
+  //       $(window).on('scroll', function () {
+  //   if ($(this).scrollTop() > 50) {
+  //     $('.navbar').addClass('fixed-top');
+  //   } else {
+  //     $('.navbar').removeClass('fixed-top');
+  //   }
+  // });
+       
+        $('#forms').hide();
+        $('#launchbtn').html('Add Address');
+        $('#nav').tabs();
+        // Launch Model
+        $('#launchbtn').on('click', function () {
+          $('#exampleModalCenter').modal('show');
+          $('#forms').appendTo('#modalbodyinsert');
+          $('#forms').show();
+          $('#exampleModalLongTitle').html('Add Address');
+        });
+        // Close Model
+        $('#btn-close').on('click', function () {
+          $('#exampleModalCenter').modal('hide');
+          $('#forms').hide();
+          location.reload();
+        });
+        //save address
+        $('#btn-save').on('click', function () {
+          const address_name = $('#addressname').val();
+          const locations = $('#loc').val();
+          const pincode = $('#pin').val();
+          const type_id = $('#address_type option:selected').val();
+          const address = {};
+          address.address_name = address_name;
+          address.locations = locations;
+          address.pincode = pincode;
+          address.type_id = type_id;
+          const validations_check = (address) => {
+            const { address_type, locations, pincode } = address;
+            if (address_type === '' || locations === '' || pincode === '') {
+              return 0;
+            } else {
+              return 1;
+            }
+          };
+
+          if (validations_check(address)) {
+            console.log(address);
+            $.ajax({
+              url: '/address',
+              type: 'post',
+              data: address,
+              success: function (data) {
+                if (data == 'duplicated') {
+                  alert('Please Enter a Unique Address');
+                } else {
+                  $('#addressname').val('');
+                  $('#loc').val('');
+                  $('#pin').val('');
+                  alert('Successfuly Submitted');
+                }
+              },
+            });
+          } else {
+            alert('All fields Required');
+          }
+        });
+      });
+    </script>
   </body>
 </html>

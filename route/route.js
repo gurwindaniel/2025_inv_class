@@ -23,6 +23,22 @@ router.get('/', async (request, response) => {
   }
 });
 
+const role_name = async (request, response) => {
+  const client = await pool.connect();
+  try {
+    const role_name = await client.query(
+      `
+      select r.role_name from users u join roles r on u.role_id=r.role_id where u.user_name=$1;
+      `,
+      [request.user.user_name]
+    );
+    return role_name.rows[0].role_name;
+  } catch (e) {
+  } finally {
+    client.release();
+  }
+};
+
 //users page
 router.get('/users', async (request, response) => {
   const client = await pool.connect();
@@ -127,7 +143,93 @@ router.post('/useredit', async (request, response) => {
 });
 
 router.get('/addressload', async (request, response) => {
-  return response.render('address');
+  const client = await pool.connect();
+  try {
+    const address_type = await client.query(
+      `
+      select * from person_type
+      `
+    );
+    const address_view = await client.query(
+      `
+      select * from address 
+              join person_type
+              on address.type_id=person_type.type_id
+      `
+    );
+    const rolename = await role_name(request, response);
+    return response.render('address', {
+      address_type: address_type.rows,
+      address_view: address_view.rows,
+      rolename: rolename,
+    });
+  } catch (e) {
+    console.log(`render address error ${e}`);
+  } finally {
+    client.release();
+  }
+});
+
+router.get('/addressload', async (request, response) => {
+  const client = await pool.connect();
+  try {
+    const address_type = await client.query(
+      `
+      select * from person_type
+      `
+    );
+    const address_view = await client.query(
+      `
+      select * from address 
+              join person_type
+              on address.type_id=person_type.type_id
+      `
+    );
+    const rolename = await role_name(request, response);
+    return response.render('address', {
+      address_type: address_type.rows,
+      address_view: address_view.rows,
+      rolename: rolename,
+    });
+  } catch (e) {
+    console.log(`render address error ${e}`);
+  } finally {
+    client.release();
+  }
+});
+
+//Post Address
+router.post('/address', async (request, response) => {
+  const client = await pool.connect();
+  const { address_name, type_id, locations, pincode } = request.body;
+  try {
+    const type_address = await client.query(
+      `
+      select address_id from address where address_name in ($1) 
+                                      and  locations in ($2)
+                                      and pincode in ($3)
+                                      and type_id in ($4)
+      `,
+      [address_name, locations, pincode, type_id]
+    );
+    if (type_address.rows[0]) {
+      return response.send('duplicated').status(200);
+    } else {
+      await client.query(
+        `
+        insert into address (address_name,type_id,locations,pincode,user_id) values
+        ($1,$2,$3,$4,$5)
+        `,
+        [address_name, +type_id, locations, +pincode, 6]
+      );
+
+      return response.send(request.body).status(200);
+    }
+  } catch (e) {
+    console.log(`post address error ${e}`);
+  } finally {
+    client.release();
+  }
 });
 
 module.exports = router;

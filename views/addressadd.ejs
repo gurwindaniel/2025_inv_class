@@ -1,0 +1,26 @@
+<form id="forms" style="display: none;" action="/address" method="post">
+    <div class="row">
+        <div class="col">
+            <label for="addressname">Address Name</label>
+            <input type="text" class="form-control" id="addressname"  name="address_name" 
+              placeholder="Customer / Vendor Name">
+        </div>
+        <div class="col">
+            <label for="loc">Place</label>
+            <input type="text" class="form-control" id="loc" name="locations" placeholder="Place">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label for="pin">Pincode</label>
+            <input type="number" class="form-control" id="pin" name="pincode" placeholder="Pincode">
+        </div>
+        <div class="col">
+            <select class="selectpicker m-4 p-2" name="type_id" id="address_type">
+                <% for(let i=0;i<address_type.length;i++) { %>
+                <option value="<%= address_type[i].type_id %>"><%=  address_type[i].person_type%></option>
+                <%}%>
+            </select>
+        </div>
+    </div>
+</form>
