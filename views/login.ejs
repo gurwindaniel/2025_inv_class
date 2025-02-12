@@ -3,15 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <%- include('./head.ejs') %>
     <title>Login</title>
+    <%- include('./head.ejs') %>
+    <style>
+     .login-container {
+      width: 300px;    /* Set the width */
+      height: 300px;   /* Set the height equal to width */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+    </style>
   </head>
-  <body>
-    <%- include('./nav.ejs') %>
-    <h1>Login</h1>
-    <h2><%= users.title %></h2>
-    <h2><%= users.name %></h2>
-    <h3><%= users.value.now %></h3>
+  <body class="d-flex justify-content-center align-items-center min-vh-100">
+    
+    <div class="container login-container">
+      <h2 class="mb-3 text-primary">Login</h1>
+      <form action="/login" method="post">
+        <div class="form-group mb-3">
+          <label for="name" class="form-label">User Name</label>
+          <input type="text" id="name" class="form-control" name="user_name" placeholder="User Name">
+        </div>
+        <div class="form-group mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" id="password" class="form-control" name="passwords" placeholder="Password">
+        </div>
+        <button type="submit" id="login-btn" class="btn btn-primary float-end">Login</button>
+      </form>
+    </div>
     <%- include('./tail.ejs') %>
+    <script src="../public/js/page_js/login.js"></script>
+    <script>
+      $(document).ready(function () {
+
+        const login = {};
+  $('#login-btn').on('click', function (e) {
+    // e.preventDefault();
+    $('input').each(function () {
+      const name = $(this).attr('name');
+      const val = $(this).val();
+      if (name == '' || val == '') {
+        alert('All fields are necessary');
+        return false;
+      } else {
+        login[name] = val;
+      }
+    });
+
+    $.ajax({
+      url: '/login',
+      method: 'post',
+      data: login,
+      success: function (data) {
+        console.log('Successfully logged in');
+      },
+    });
+  });
+      });
+    </script>
   </body>
 </html>

@@ -1,7 +1,9 @@
 const express = require('express');
 const { request } = require('http');
 const bcyrptjs = require('bcryptjs');
+const passport = require('passport');
 const router = express.Router();
+const auth = require('../middleware/auth');
 
 router.get('/', async (request, response) => {
   const client = await pool.connect();
@@ -40,7 +42,8 @@ const role_name = async (request, response) => {
 };
 
 //users page
-router.get('/users', async (request, response) => {
+router.get('/users', auth.isAuth, async (request, response) => {
+  console.log(request.user);
   const client = await pool.connect();
   try {
     const roles = await client.query('select * from roles');
@@ -142,7 +145,7 @@ router.post('/useredit', async (request, response) => {
   }
 });
 
-router.get('/addressload', async (request, response) => {
+router.get('/addressload', auth.isAuth, async (request, response) => {
   const client = await pool.connect();
   try {
     const address_type = await client.query(
@@ -170,7 +173,7 @@ router.get('/addressload', async (request, response) => {
   }
 });
 
-router.get('/addressload', async (request, response) => {
+router.get('/addressload', auth.isAuth, async (request, response) => {
   const client = await pool.connect();
   try {
     const address_type = await client.query(
@@ -197,6 +200,18 @@ router.get('/addressload', async (request, response) => {
     client.release();
   }
 });
+
+//post users login
+
+// Login post
+router.post(
+  '/login',
+  passport.authenticate('local', {
+    successRedirect: '/users',
+    failureRedirect: '/',
+    failureFlash: true,
+  })
+);
 
 //Post Address
 router.post('/address', async (request, response) => {
@@ -230,6 +245,16 @@ router.post('/address', async (request, response) => {
   } finally {
     client.release();
   }
+});
+
+//logout
+router.delete('/logout', (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err); // Pass the error to the next middleware for handling
+    }
+    res.redirect('/'); // Redirect to the home page on successful logout
+  });
 });
 
 module.exports = router;
