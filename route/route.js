@@ -73,12 +73,15 @@ router.post('/userpost', async (request, response) => {
   );
   console.log(hashed_password);
   try {
-    console.log(users);
-    const user_name = await client.query(
-      `select user_name from users where user_name in ($1)`,
-      [request.body.user_name]
-    );
-    if (user_name.rows[0]) {
+    // const user_name = await client.query(
+    //   `select user_name from users where user_name in ($1)`,
+    //   [request.body.user_name]
+    // );
+    const us = await client.query(`select user_dup_check($1,$2)`, [
+      request.body.user_name,
+      request.body.role_id,
+    ]);
+    if (us.rows[0]) {
       return response.send('duplicate').status(200);
     } else {
       await client.query(

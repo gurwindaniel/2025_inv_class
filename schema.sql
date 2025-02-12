@@ -116,10 +116,28 @@ select a.address_name,p.product_name,g.grn_quantity,g.grn_amount,s.sale_quantity
                                                                                                join invoice i on i.invoice_id =s.invoice_id 
                                                                                                join address a on a.address_id=i.address_id;
 
+CREATE OR REPLACE FUNCTION user_dup_check(username varchar,roleid int)
+RETURNS boolean
+AS
+$$
+DECLARE
+rec RECORD;
+BEGIN
+SELECT INTO rec * from users where user_name=username and role_id=roleid;
+if rec.user_name is null then
+return false;
+else
+return true;
+end if;
+END
+$$ LANGUAGE plpgsql;
+
+
+
 
 select p.product_name,sum(s.sale_amount)-sum(g.grn_amount) as Profit,sum(g.grn_quantity)-sum(s.sale_quantity) as Quantity from sale s 
                                                                                                                          join grn g on g.grn_id=s.grn_id 
                                                                                                                          join product p on p.product_id =s.product_id 
                                                                                                                          join invoice i on i.invoice_id =s.invoice_id 
                                                                                                                          join address a on a.address_id=i.address_id 
-                                                                                                                         group by p.product_name;
+                                                                                                                         group by p.product_name              
