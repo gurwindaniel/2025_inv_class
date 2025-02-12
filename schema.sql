@@ -132,7 +132,7 @@ end if;
 END
 $$ LANGUAGE plpgsql;
 
-
+select user_dup_check('admin',1);
 
 
 select p.product_name,sum(s.sale_amount)-sum(g.grn_amount) as Profit,sum(g.grn_quantity)-sum(s.sale_quantity) as Quantity from sale s 
