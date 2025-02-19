@@ -26,7 +26,7 @@ passport.use(
   new LocalStrategy(
     { usernameField: 'user_name', passwordField: 'passwords' },
     async function (user_name, passwords, done) {
-      console.log(user_name);
+      // console.log(user_name);
       const client = await pool.connect();
       try {
         await client.query(
@@ -34,7 +34,7 @@ passport.use(
           [user_name],
           async function (error, response) {
             if (error) {
-              console.log(error);
+              // console.log(error);
               return done(error);
             } else if (response.rows[0] == null) {
               return done(null, false, { message: 'Incorrect Username' });

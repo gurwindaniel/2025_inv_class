@@ -87,8 +87,10 @@
                         return false
                     }else{
                         alert('User Created Successfully');
+                  
                     $('#us').val('');
                     $('#ps').val('');
+                    location.reload();
                     }
                     
                     // location.reload();
@@ -124,6 +126,9 @@
     $('#passwordview').val(trimmed_value);
     $('#roles_id').prop('disabled', true);
 
+    // For delete purpose
+    $('#mycheck').val(rowData[0]);
+    
     if ($('#roles_id option:selected').text() == rowData[2]) {
       $('#rowModal').modal('show');
       return;
@@ -155,6 +160,40 @@
     console.log(rowData);
   
   })//single view ends
+
+   // Delete user
+   $('#mycheck').on('change', function () {
+    if ($(this).prop('checked')) {
+      $('#delete_user').show();
+      $('#save_users').hide();
+    } else {
+      $('#delete_user').hide();
+    }
+  });
+
+
+  //Delete User
+
+  $('#delete_user').on('click', function (e) {
+    const user_id = $('#mycheck').val();
+    console.log(user_id)
+    $.ajax({
+      url: `/delete_user/${user_id}`,
+      type: 'delete',
+      success: function (data) {
+        if (data == 'not deleted') {
+          alert('user not allow to delete');
+        }
+        alert(data.message);
+        location.reload();
+      },
+      error: function (error) {
+        alert(error.message);
+        location.reload();
+      },
+    });
+  });
+
 
         //close model
         $('#close_users').on('click',function(e){

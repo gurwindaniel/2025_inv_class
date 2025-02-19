@@ -43,7 +43,7 @@ const role_name = async (request, response) => {
 
 //users page
 router.get('/users', auth.isAuth, async (request, response) => {
-  console.log(request.user);
+  // console.log(request.user);
   const client = await pool.connect();
   try {
     const roles = await client.query('select * from roles');
@@ -51,7 +51,7 @@ router.get('/users', auth.isAuth, async (request, response) => {
       'select * from users u join roles r on u.role_id=r.role_id'
     );
 
-    console.log(roles.rows);
+    // console.log(roles.rows);
     return response.render('users', {
       roles: roles.rows,
       list_users: users.rows,
@@ -71,17 +71,17 @@ router.post('/userpost', async (request, response) => {
     String(request.body.passwords),
     10
   );
-  console.log(hashed_password);
+  // console.log(hashed_password);
   try {
-    // const user_name = await client.query(
-    //   `select user_name from users where user_name in ($1)`,
-    //   [request.body.user_name]
-    // );
-    const us = await client.query(`select user_dup_check($1,$2)`, [
-      request.body.user_name,
-      request.body.role_id,
-    ]);
-    if (us.rows[0]) {
+    const user_name = await client.query(
+      `select user_name from users where user_name in ($1)`,
+      [request.body.user_name]
+    );
+    // const us = await client.query(`select user_dup_check($1,$2)`, [
+    //   request.body.user_name,
+    //   request.body.role_id,
+    // ]);
+    if (user_name.rows[0]) {
       return response.send('duplicate').status(200);
     } else {
       await client.query(
@@ -116,8 +116,8 @@ router.post('/useredit', async (request, response) => {
       [user_id]
     );
     const users = user_data.rows[0];
-    console.log(`User from data ${users.user_name}`);
-    console.log(`users to check ${users_check.user_name}`);
+    // console.log(`User from data ${users.user_name}`);
+    // console.log(`users to check ${users_check.user_name}`);
     edit_keys = [];
     for (let key in users_check) {
       if (users[key] != users_check[key]) {
@@ -147,6 +147,53 @@ router.post('/useredit', async (request, response) => {
     client.release();
   }
 });
+
+//delete users
+
+// Delete users
+router.delete(
+  '/delete_user/:user_id',
+  auth.isAuth,
+  async (request, response) => {
+    const client = await pool.connect();
+    const user_id = request.params.user_id;
+    console.log(user_id);
+    try {
+      const user_name = await client.query(
+        'select user_name from users where user_id in ($1)',
+        [user_id]
+      );
+      if (user_name.rows[0].user_name == 'admin') {
+        return response
+          .send({ message: 'Cannot Delete Admin user' })
+          .status(400);
+      }
+      const delete_count = await client.query(
+        `delete from users where user_id in ($1) RETURNING*`,
+        [user_id]
+      );
+      if (delete_count.rowCount === 0) {
+        return response.send({ message: 'not deleted' }).status(400);
+      }
+      return response
+        .send({ message: `${user_name.rows[0].user_name} has been deleted` })
+        .status(200);
+    } catch (e) {
+      if (e.code === '23503') {
+        // Foreign key violation
+        return response
+          .send({
+            message: 'Cannot delete user as it is referenced by other data.',
+            details: e.detail, // PostgreSQL provides additional detail about the violation
+          })
+          .status(400);
+      }
+      console.log(`Delete User Page error : ${e}`);
+    } finally {
+      client.release();
+    }
+  }
+);
 
 router.get('/addressload', auth.isAuth, async (request, response) => {
   const client = await pool.connect();
